@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+case $1 in
+  logs)
+    docker-compose logs -f --tail 100 $2
+    ;;
+
+  shell)
+    docker-compose run --rm $2 bash
+    ;;
+
+  ipython)
+    docker-compose run --rm api ipython
+    ;;
+
+  aerich)
+    docker-compose run --rm api aerich ${@:2}
+    ;;
+
+  test)
+    ENVIRONMENT=test docker-compose run --rm api bash scripts/test.sh ${@:2}
+    ;;
+
+  format)
+    bash scripts/format.sh
+    ;;
+
+  update-messages)
+    bash scripts/update-messages.sh
+    ;;
+
+  compile-emails)
+    bash scripts/compile-emails.sh
+    ;;
+
+  *)
+    docker-compose ${@}
+    ;;
+esac

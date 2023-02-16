@@ -1,0 +1,39 @@
+version: "3.3"
+
+volumes:
+  app-db-data: null
+  ipython_data_local: null
+
+services:
+  db:
+    image: postgres:14
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
+  cache:
+    image: redis:7.0
+
+  api:
+    image: api
+    depends_on:
+      - db
+      - cache
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ipython_data_local:/root/.ipython/profile_default
+      - /app/.venv
+    build:
+      context: .
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-true}
+    command: /start-local.sh
